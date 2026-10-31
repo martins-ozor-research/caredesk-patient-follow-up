@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Caredesk — Smart Patient Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Epilogue:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --green: #0B6E4F;
+  --green-light: #12A07A;
+  --green-pale: #E8F5F0;
+  --white: #FFFFFF;
+  --cream: #F8F6F2;
+  --dark: #0D1B14;
+  --gray: #6B7280;
+  --border: #E2E8E4;
+  --red: #DC2626;
+  --orange: #D97706;
+  --blue: #2563EB;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Epilogue',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--dark);padding:20px;position:relative;overflow:hidden;}
+.auth-screen::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(18,160,122,0.15),transparent 70%);top:-100px;right:-100px;pointer-events:none;}
+.auth-card{background:var(--white);border-radius:20px;padding:48px;width:100%;max-width:440px;position:relative;z-index:2;}
+.auth-logo{font-family:'Fraunces',serif;font-size:30px;font-weight:800;color:var(--green);margin-bottom:4px;}
+.auth-logo span{color:var(--dark);}
+.auth-tagline{font-size:13px;color:var(--gray);margin-bottom:36px;line-height:1.5;}
+.auth-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Epilogue',sans-serif;font-size:14px;color:var(--dark);background:var(--white);outline:none;transition:border-color 0.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--green);}
+textarea{resize:vertical;min-height:80px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-family:'Epilogue',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;}
+.btn-primary{background:var(--green);color:var(--white);width:100%;padding:14px;font-size:15px;}
+.btn-primary:hover{background:var(--green-light);}
+.btn-outline{background:transparent;color:var(--green);border:1.5px solid var(--green);}
+.btn-outline:hover{background:var(--green-pale);}
+.btn-ghost{background:transparent;color:var(--gray);border:1.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--green);color:var(--green);}
+.btn-danger{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}
+.btn-danger:hover{background:#FEE2E2;}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--gray);}
+.auth-switch a{color:var(--green);font-weight:600;cursor:pointer;text-decoration:none;}
+
+/* APP */
+.app{display:none;min-height:100vh;}
+.sidebar{position:fixed;top:0;left:0;width:250px;height:100vh;background:var(--dark);display:flex;flex-direction:column;z-index:100;transition:transform 0.3s;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.logo-text{font-family:'Fraunces',serif;font-size:24px;font-weight:800;color:var(--white);}
+.logo-text span{color:var(--green-light);}
+.logo-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+.nav-section{font-size:10px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;padding:12px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:14px;font-weight:500;transition:all 0.15s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:var(--white);}
+.nav-item.active{background:var(--green);color:var(--white);}
+.nav-item .icon{font-size:16px;width:22px;text-align:center;}
+.sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08);}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);}
+.user-avatar{width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--white);flex-shrink:0;}
+.user-name{font-size:13px;font-weight:600;color:var(--white);}
+.user-role{font-size:11px;color:rgba(255,255,255,0.4);}
+.logout-btn{margin-top:8px;width:100%;background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);padding:9px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Epilogue',sans-serif;}
+.logout-btn:hover{background:rgba(220,38,38,0.2);color:#FCA5A5;}
+
+/* MAIN */
+.main{margin-left:250px;min-height:100vh;padding:28px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.page-title{font-family:'Fraunces',serif;font-size:26px;font-weight:800;}
+.page-subtitle{font-size:13px;color:var(--gray);margin-top:3px;}
+.topbar-actions{display:flex;gap:10px;align-items:center;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--white);border-radius:14px;padding:20px;border:1px solid var(--border);}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px;}
+.stat-num{font-family:'Fraunces',serif;font-size:32px;font-weight:800;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:12px;color:var(--gray);}
+
+/* PANELS */
+.panel{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px;}
+.panel-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-family:'Fraunces',serif;font-size:16px;font-weight:700;}
+.panel-body{padding:20px;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);border-bottom:1px solid var(--border);background:var(--cream);}
+td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFAF9;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:#D1FAE5;color:#065F46;}
+.badge-orange{background:#FEF3C7;color:#92400E;}
+.badge-red{background:#FEE2E2;color:#991B1B;}
+.badge-blue{background:#DBEAFE;color:#1E40AF;}
+.badge-gray{background:#F3F4F6;color:#374151;}
+.badge-purple{background:#EDE9FE;color:#5B21B6;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:18px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-header{padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);padding:4px;line-height:1;}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+/* SEARCH */
+.search-wrap{position:relative;}
+.search-wrap input{padding-left:38px;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:15px;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.alert-success{background:#D1FAE5;color:#065F46;}
+.alert-error{background:#FEE2E2;color:#991B1B;}
+.alert-info{background:#DBEAFE;color:#1E40AF;}
+.alert-warning{background:#FEF3C7;color:#92400E;}
+
+/* PATIENT CARD */
+.patient-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:16px;background:var(--white);}
+.patient-avatar{width:44px;height:44px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--green);flex-shrink:0;}
+.patient-info{flex:1;}
+.patient-name{font-size:14px;font-weight:600;}
+.patient-meta{font-size:12px;color:var(--gray);margin-top:2px;}
+.patient-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:52px 24px;color:var(--gray);}
+.empty-icon{font-size:52px;margin-bottom:14px;}
+.empty-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--dark);margin-bottom:6px;}
+.empty-text{font-size:13px;margin-bottom:20px;line-height:1.6;}
+
+/* MOBILE */
+.mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:58px;background:var(--dark);z-index:99;padding:0 16px;align-items:center;justify-content:space-between;}
+.menu-toggle{background:none;border:none;color:var(--white);font-size:24px;cursor:pointer;}
+.mobile-logo{font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:var(--white);}
+.mobile-logo span{color:var(--green-light);}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:none;}
+
+
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 42px; }
+.pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 17px; color: var(--gray); padding: 0; line-height: 1; }
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:var(--white);padding:14px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;transform:translateY(100px);opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:10px;max-width:340px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-left:4px solid var(--green-light);}
+.toast.error{border-left:4px solid var(--red);}
+
+/* FOLLOW UP MSG BOX */
+.msg-box{background:var(--green-pale);border:1px solid rgba(11,110,79,0.2);border-radius:10px;padding:16px;font-size:13px;line-height:1.7;color:var(--dark);margin-top:12px;}
+
+/* REMINDER ITEM */
+.reminder-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.reminder-item:last-child{border-bottom:none;}
+.reminder-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.reminder-info{flex:1;}
+.reminder-name{font-size:13px;font-weight:600;}
+.reminder-drug{font-size:12px;color:var(--gray);}
+.reminder-due{font-size:12px;font-weight:600;white-space:nowrap;}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.open{display:block;}
+  .main{margin-left:0;padding:70px 16px 24px;}
+  .mobile-header{display:flex;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .topbar{flex-direction:column;align-items:flex-start;}
+  .form-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .auth-card{padding:28px 20px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUTH -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">Care<span>desk</span></div>
+    <div class="auth-tagline">Smart patient management for pharmacies, hospitals and health centres across Nigeria.</div>
+
+    <div id="loginForm">
+      <div class="auth-title">Welcome back 👋</div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" name="email" placeholder="you@facility.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap"><input type="password" id="loginPassword" name="password" placeholder="Your password" autocomplete="current-password"/><button type="button" class="pw-toggle" onclick="togglePw('loginPassword', this)">👁️</button></div>
+      </div>
+      <button class="btn btn-primary" onclick="login()" style="margin-top:8px">Sign In</button>
+      <div class="auth-switch">No account? <a onclick="showRegister()">Create one free</a></div>
+    </div>
+
+    <div id="registerForm" style="display:none">
+      <div class="auth-title">Create your account</div>
+      <div class="form-group">
+        <label>Your Full Name</label>
+        <input type="text" id="regName" placeholder="Dr. Amaka Okonkwo" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label>Facility Name</label>
+        <input type="text" id="regFacility" placeholder="e.g. HealthPlus Clinic Ibadan"/>
+      </div>
+      <div class="form-group">
+        <label>Facility Type</label>
+        <select id="regType">
+          <option value="">Select type...</option>
+          <option>Community Pharmacy</option>
+          <option>Hospital</option>
+          <option>Health Centre</option>
+          <option>Clinic</option>
+          <option>Dispensary</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="you@facility.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap"><input type="password" id="regPassword" placeholder="Create a strong password" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePw('regPassword', this)">👁️</button></div>
+      </div>
+      <button class="btn btn-primary" onclick="register()" style="margin-top:8px">Create Free Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+  <div class="mobile-header">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="mobile-logo">Care<span>desk</span></div>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Care<span>desk</span></div>
+      <div class="logo-sub" id="facilityLabel">Your Facility</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('patients')">
+        <span class="icon">👥</span> Patients
+      </div>
+      <div class="nav-section">Tools</div>
+      <div class="nav-item" onclick="showPage('reminders')">
+        <span class="icon">⏰</span> Refill Reminders
+      </div>
+      <div class="nav-item" onclick="showPage('followup')">
+        <span class="icon">💬</span> Follow-Up Messages
+      </div>
+      <div class="nav-section">Records</div>
+      <div class="nav-item" onclick="showPage('records')">
+        <span class="icon">📋</span> Patient Records
+      </div>
+      <div class="nav-item" onclick="showPage('appointments')">
+        <span class="icon">📅</span> Appointments
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">M</div>
+        <div>
+          <div class="user-name" id="userName">Martins</div>
+          <div class="user-role" id="userRole">Pharmacist</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Good morning 👋</div>
+          <div class="page-subtitle" id="dashGreeting">Here is what needs your attention today.</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addPatientModal')">+ Add Patient</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#E8F5F0">👥</div>
+          <div class="stat-num" id="statPatients">0</div>
+          <div class="stat-label">Total Patients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FEF3C7">⏰</div>
+          <div class="stat-num" id="statDueToday">0</div>
+          <div class="stat-label">Reminders Due</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#DBEAFE">💬</div>
+          <div class="stat-num" id="statFollowUps">0</div>
+          <div class="stat-label">Follow-Ups Sent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#EDE9FE">💊</div>
+          <div class="stat-num" id="statChronic">0</div>
+          <div class="stat-label">Chronic Patients</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⏰ Due for Refill Today</div>
+          </div>
+          <div class="panel-body" id="dashReminders">
+            <div class="empty-state">
+              <div class="empty-icon">✅</div>
+              <div class="empty-title">All clear</div>
+              <div class="empty-text">No refills due today.</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">👥 Recent Patients</div>
+          </div>
+          <div class="panel-body" id="dashPatients">
+            <div class="empty-state">
+              <div class="empty-icon">👤</div>
+              <div class="empty-title">No patients yet</div>
+              <div class="empty-text">Add your first patient to get started.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATIENTS -->
+    <div class="page" id="page-patients">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Patients</div>
+          <div class="page-subtitle">Search and manage all patient records</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addPatientModal')">+ Add Patient</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="search-wrap" style="width:100%;max-width:360px">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="patientSearch" placeholder="Search by name or phone number..." oninput="renderPatients()"/>
+          </div>
+        </div>
+        <div class="panel-body" id="patientList"></div>
+      </div>
+    </div>
+
+    <!-- REMINDERS -->
+    <div class="page" id="page-reminders">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Refill Reminders</div>
+          <div class="page-subtitle">Automated medication refill tracking for chronic patients</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addReminderModal')">+ Add Reminder</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">All Reminders</div>
+          <select id="reminderFilter" onchange="renderReminders()" style="width:auto;padding:7px 12px;font-size:13px;">
+            <option value="all">All</option>
+            <option value="due">Due Today</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+        <div class="panel-body" id="reminderList"></div>
+      </div>
+    </div>
+
+    <!-- FOLLOW UP -->
+    <div class="page" id="page-followup">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Follow-Up Messages</div>
+          <div class="page-subtitle">Send post-visit counselling messages to patients</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Generate Message</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Select Patient</label>
+              <select id="followupPatient" onchange="onFollowupPatientChange()">
+                <option value="">Choose patient...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Medication / Treatment</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="followupDrug" placeholder="e.g. Amlodipine 5mg" oninput="updateFollowupMessage()" style="flex:1"/>
+                <button class="btn btn-outline btn-sm" onclick="lookupDrug()" title="Auto-fill side effects and avoid" style="white-space:nowrap;flex-shrink:0">🔍 Lookup</button>
+              </div>
+              <div id="drugLookupStatus" style="font-size:11px;color:var(--gray);margin-top:4px;display:none"></div>
+            </div>
+            <div class="form-group">
+              <label>Instructions</label>
+              <input type="text" id="followupInstruction" placeholder="e.g. Take one tablet every morning" oninput="updateFollowupMessage()"/>
+            </div>
+            <div class="form-group">
+              <label>Side Effects to Watch</label>
+              <input type="text" id="followupSideEffects" placeholder="e.g. Dizziness, swollen ankles" oninput="updateFollowupMessage()"/>
+            </div>
+            <div class="form-group">
+              <label>What to Avoid</label>
+              <input type="text" id="followupAvoid" placeholder="e.g. Grapefruit juice, alcohol" oninput="updateFollowupMessage()"/>
+            </div>
+            <div class="form-group">
+              <label>Follow-up Date</label>
+              <input type="date" id="followupDate" oninput="updateFollowupMessage()"/>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Message Preview</div></div>
+          <div class="panel-body">
+            <div id="msgPreview">
+              <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <div class="empty-title">Fill in the form</div>
+                <div class="empty-text">Your follow-up message will appear here as you type.</div>
+              </div>
+            </div>
+            <div id="msgActions" style="display:none;margin-top:16px;display:none;">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+  <button class="btn btn-primary" style="width:100%;background:#25D366" onclick="sendFollowup('whatsapp')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Open WhatsApp — Message Ready to Send
+  </button>
+  <button class="btn btn-ghost" style="width:100%" onclick="sendFollowup('sms')">📋 Copy for SMS</button>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Follow-Up History</div></div>
+        <div class="panel-body" id="followupHistory">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-title">No messages sent yet</div>
+            <div class="empty-text">Your sent follow-up messages will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECORDS -->
+    <div class="page" id="page-records">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Patient Records</div>
+          <div class="page-subtitle">Search any patient by name or phone number</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="search-wrap" style="width:100%;max-width:400px">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="recordSearch" placeholder="Type name or phone number..." oninput="renderRecords()" onkeydown="if(event.key==='Enter')renderRecords()"/>
+          </div>
+        </div>
+        <div class="panel-body" id="recordList">
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">Search for a patient</div>
+            <div class="empty-text">Type a name or phone number above to find patient records.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+
+<!-- EDIT PATIENT MODAL -->
+<div class="modal-overlay" id="editPatientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Patient</div>
+      <button class="modal-close" onclick="closeModal('editPatientModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editPatientId"/>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="editName" placeholder="Patient full name"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="editPhone" placeholder="+234 800 000 0000"/>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="editAge" placeholder="e.g. 45"/>
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="editGender">
+            <option value="">Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Chronic Conditions</label>
+        <input type="text" id="editConditions" placeholder="e.g. Hypertension, Diabetes"/>
+      </div>
+      <div class="form-group">
+        <label>Known Allergies ⚠️</label>
+        <input type="text" id="editAllergies" placeholder="e.g. Penicillin, Aspirin, Sulfa drugs"/>
+      </div>
+      <div class="form-group">
+        <label>Current Medications</label>
+        <textarea id="editMeds" placeholder="e.g. Amlodipine 5mg, Metformin 500mg"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="editNotes" placeholder="Any additional notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editPatientModal')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveEditPatient()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ADD APPOINTMENT MODAL -->
+<div class="modal-overlay" id="addAppointmentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Book Appointment</div>
+      <button class="modal-close" onclick="closeModal('addAppointmentModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Patient *</label>
+        <select id="apptPatient">
+          <option value="">Select patient...</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="apptDate"/>
+        </div>
+        <div class="form-group">
+          <label>Time *</label>
+          <input type="time" id="apptTime"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Reason for Visit</label>
+        <input type="text" id="apptReason" placeholder="e.g. Follow-up, Blood pressure check, Refill"/>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="apptNotes" placeholder="Any additional notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addAppointmentModal')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="addAppointment()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end app -->
+
+<!-- ADD PATIENT MODAL -->
+<div class="modal-overlay" id="addPatientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Patient</div>
+      <button class="modal-close" onclick="closeModal('addPatientModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="pName" placeholder="Patient full name"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="pPhone" placeholder="+234 800 000 0000"/>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="pAge" placeholder="e.g. 45"/>
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="pGender">
+            <option value="">Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Chronic Conditions</label>
+        <input type="text" id="pConditions" placeholder="e.g. Hypertension, Diabetes (leave blank if none)"/>
+      </div>
+      <div class="form-group">
+        <label>Known Allergies ⚠️</label>
+        <input type="text" id="pAllergies" placeholder="e.g. Penicillin, Aspirin, Sulfa drugs (leave blank if none)"/>
+      </div>
+      <div class="form-group">
+        <label>Current Medications</label>
+        <textarea id="pMeds" placeholder="e.g. Amlodipine 5mg, Metformin 500mg"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="pNotes" placeholder="Any additional notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addPatientModal')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="addPatient()">Save Patient</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD REMINDER MODAL -->
+<div class="modal-overlay" id="addReminderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Refill Reminder</div>
+      <button class="modal-close" onclick="closeModal('addReminderModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Patient *</label>
+        <select id="rPatient">
+          <option value="">Select patient...</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Medication *</label>
+          <input type="text" id="rDrug" placeholder="e.g. Lisinopril 10mg"/>
+        </div>
+        <div class="form-group">
+          <label>Supply Duration</label>
+          <select id="rDuration">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30" selected>30 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Dispensed Date *</label>
+        <input type="date" id="rDate"/>
+      </div>
+      <div class="form-group">
+        <label>Reminder Channel</label>
+        <select id="rChannel">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="sms">SMS</option>
+          <option value="both">Both WhatsApp and SMS</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addReminderModal')">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="addReminder()">Set Reminder</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW PATIENT MODAL -->
+<div class="modal-overlay" id="viewPatientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Patient Profile</div>
+      <button class="modal-close" onclick="closeModal('viewPatientModal')">×</button>
+    </div>
+    <div class="modal-body" id="viewPatientBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('viewPatientModal')">Close</button>
+      <button class="btn btn-outline" style="width:auto" onclick="printPatient(currentViewingPatientId)">🖨️ Print Summary</button>
+      <button class="btn btn-primary" style="width:auto" id="editPatientBtn" onclick="openEditFromView()">✏️ Edit Patient</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── DATA STORE ──
+let currentUser = null;
+let db = { patients: [], reminders: [], followups: [], appointments: [] };
+
+// ── SUPABASE ──
+const SUPABASE_URL = 'https://kywmxtanwgjnekxmuite.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bFqx1R-dVQ4RoyiDdjD9-Q_uQh10nS9';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const TABLES = {
+  patients: {
+    toRow: p => ({ id: p.id, clinic_id: currentUser.clinicId, created_by: currentUser.id, name: p.name, phone: p.phone, age: p.age, gender: p.gender, conditions: p.conditions, allergies: p.allergies, medications: p.medications, notes: p.notes }),
+    fromRow: r => ({ id: r.id, userId: currentUser.id, name: r.name, phone: r.phone, age: r.age, gender: r.gender, conditions: r.conditions, allergies: r.allergies, medications: r.medications, notes: r.notes, createdAt: r.created_at })
+  },
+  reminders: {
+    toRow: x => ({ id: x.id, clinic_id: currentUser.clinicId, patient_id: x.patientId, drug: x.drug, dispensed_date: x.dispensedDate, duration: x.duration, due_date: x.dueDate, channel: x.channel, status: x.status }),
+    fromRow: r => ({ id: r.id, userId: currentUser.id, patientId: r.patient_id, drug: r.drug, dispensedDate: r.dispensed_date, duration: r.duration, dueDate: r.due_date, channel: r.channel, status: r.status, createdAt: r.created_at })
+  },
+  followups: {
+    toRow: x => ({ id: x.id, clinic_id: currentUser.clinicId, patient_id: x.patientId, drug: x.drug, message: x.message, sent_at: x.sentAt }),
+    fromRow: r => ({ id: r.id, userId: currentUser.id, patientId: r.patient_id, drug: r.drug, message: r.message, sentAt: r.sent_at })
+  },
+  appointments: {
+    toRow: x => ({ id: x.id, clinic_id: currentUser.clinicId, patient_id: x.patientId, date: x.date, time: x.time, reason: x.reason, notes: x.notes, status: x.status }),
+    fromRow: r => ({ id: r.id, userId: currentUser.id, patientId: r.patient_id, date: r.date, time: r.time, reason: r.reason, notes: r.notes, status: r.status, createdAt: r.created_at })
+  }
+};
+const TABLE_ORDER = ['patients', 'reminders', 'followups', 'appointments'];
+let synced = { patients: new Set(), reminders: new Set(), followups: new Set(), appointments: new Set() };
+
+async function loadAll() {
+  for (const key of TABLE_ORDER) {
+    const { data, error } = await sb.from(key).select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    db[key] = data.map(TABLES[key].fromRow);
+    synced[key] = new Set(db[key].map(x => x.id));
+  }
+}
+
+async function syncAll() {
+  if (!currentUser) return;
+  for (const key of TABLE_ORDER) {
+    const rows = db[key].map(TABLES[key].toRow);
+    if (rows.length) {
+      const { error } = await sb.from(key).upsert(rows);
+      if (error) throw error;
+    }
+  }
+  for (const key of [...TABLE_ORDER].reverse()) {
+    const current = new Set(db[key].map(x => x.id));
+    const removed = [...synced[key]].filter(id => !current.has(id));
+    if (removed.length) {
+      const { error } = await sb.from(key).delete().in('id', removed);
+      if (error) throw error;
+    }
+    synced[key] = current;
+  }
+}
+
+let savingChain = Promise.resolve();
+function save() {
+  savingChain = savingChain.then(syncAll).catch(e => {
+    console.error(e);
+    toast('Could not save to the server. Check your connection.', 'error');
+  });
+  return savingChain;
+}
+
+function uid() { return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === 'x' ? r : (r&0x3|0x8)).toString(16); }); }
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ── AUTH ──
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+}
+
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('registerForm').style.display = 'none';
+}
+
+async function register() {
+  const name = document.getElementById('regName').value.trim();
+  const facility = document.getElementById('regFacility').value.trim();
+  const type = document.getElementById('regType').value;
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (!name || !facility || !type || !email || !password) { toast('Please fill in all fields', 'error'); return; }
+  if (password.length < 8) { toast('Password must be at least 8 characters', 'error'); return; }
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name, facility, type } } });
+  if (error) { toast(error.message, 'error'); return; }
+  if (!data.session) { toast('Account created. Check your email to confirm it, then sign in.'); showLogin(); return; }
+  await enterApp(data.user);
+  toast('Account created successfully!');
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { toast('Enter your email and password', 'error'); return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { toast('Invalid email or password', 'error'); return; }
+  const ok = await enterApp(data.user);
+  if (ok) toast('Welcome back, ' + currentUser.name.split(' ')[0] + '!');
+}
+
+async function enterApp(user) {
+  try {
+    const { data: prof, error } = await sb.from('profiles').select('name, clinic_id, clinics(name, type)').eq('id', user.id).single();
+    if (error || !prof) throw error || new Error('No profile');
+    currentUser = { id: user.id, email: user.email, name: prof.name || user.email, facility: prof.clinics.name, type: prof.clinics.type || '', clinicId: prof.clinic_id };
+    await loadAll();
+    startApp();
+    return true;
+  } catch (e) {
+    console.error(e);
+    toast('Could not load your account data', 'error');
+    return false;
+  }
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  db = { patients: [], reminders: [], followups: [], appointments: [] };
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  showLogin();
+}
+
+function startApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('facilityLabel').textContent = currentUser.facility;
+  document.getElementById('userName').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('userRole').textContent = currentUser.type;
+  document.getElementById('userAvatar').textContent = currentUser.name[0].toUpperCase();
+  document.getElementById('dashGreeting').textContent = `Welcome to ${currentUser.facility}`;
+  populatePatientSelects();
+  renderDashboard();
+  renderPatients();
+  renderReminders();
+  renderFollowupHistory();
+  renderAppointments();
+}
+
+// ── NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget && event.currentTarget.classList.add('active');
+  if (window.innerWidth <= 768) { closeSidebar(); }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── MODAL ──
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'addReminderModal') populatePatientSelects();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── PATIENTS ──
+function myPatients() {
+  return db.patients.filter(p => p.userId === currentUser.id);
+}
+
+function addPatient() {
+  const name = document.getElementById('pName').value.trim();
+  const phone = document.getElementById('pPhone').value.trim();
+  if (!name || !phone) { toast('Name and phone are required', 'error'); return; }
+  const patient = {
+    id: uid(),
+    userId: currentUser.id,
+    name,
+    phone,
+    age: document.getElementById('pAge').value,
+    gender: document.getElementById('pGender').value,
+    conditions: document.getElementById('pConditions').value.trim(),
+    allergies: document.getElementById('pAllergies').value.trim(),
+    medications: document.getElementById('pMeds').value.trim(),
+    notes: document.getElementById('pNotes').value.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  db.patients.push(patient);
+  save();
+  closeModal('addPatientModal');
+  ['pName','pPhone','pAge','pConditions','pAllergies','pMeds','pNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pGender').value = '';
+  populatePatientSelects();
+  renderDashboard();
+  renderPatients();
+  toast('Patient added successfully!');
+}
+
+function renderPatients() {
+  const query = (document.getElementById('patientSearch')?.value || '').toLowerCase();
+  const list = myPatients().filter(p =>
+    p.name.toLowerCase().includes(query) || p.phone.includes(query)
+  );
+  const el = document.getElementById('patientList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No patients found</div><div class="empty-text">Add your first patient or try a different search.</div><button class="btn btn-primary btn-sm" onclick="openModal('addPatientModal')">+ Add Patient</button></div>`;
+    return;
+  }
+  el.innerHTML = list.map(p => `
+    <div class="patient-card">
+      <div class="patient-avatar">${p.name[0].toUpperCase()}</div>
+      <div class="patient-info">
+        <div class="patient-name">${p.name}</div>
+        <div class="patient-meta">📞 ${p.phone} ${p.age ? '· Age ' + p.age : ''} ${p.conditions ? '· ' + p.conditions : ''}</div>
+        ${p.allergies ? `<div style="font-size:11px;color:#991B1B;font-weight:600;margin-top:2px;">🚨 Allergies: ${p.allergies}</div>` : ''}
+      </div>
+      <div class="patient-actions">
+        <button class="btn btn-outline btn-sm" onclick="viewPatient('${p.id}')">View</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEditPatient('${p.id}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePatient('${p.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewPatient(id) {
+  const p = db.patients.find(x => x.id === id);
+  if (!p) return;
+  const reminders = db.reminders.filter(r => r.patientId === id);
+  const followups = db.followups.filter(f => f.patientId === id);
+  document.getElementById('viewPatientBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div class="patient-avatar" style="width:56px;height:56px;font-size:22px">${p.name[0].toUpperCase()}</div>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700">${p.name}</div>
+        <div style="font-size:13px;color:var(--gray)">📞 ${p.phone} ${p.gender ? '· ' + p.gender : ''} ${p.age ? '· Age ' + p.age : ''}</div>
+      </div>
+    </div>
+    ${p.allergies ? `<div class="alert alert-error" style="background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;font-weight:600;">🚨 ALLERGIES: ${p.allergies}</div>` : ''}
+    ${p.conditions ? `<div class="alert alert-warning">⚕️ <strong>Chronic Conditions:</strong> ${p.conditions}</div>` : ''}
+    ${p.medications ? `<div class="form-group"><label>Current Medications</label><div style="background:var(--cream);padding:12px;border-radius:8px;font-size:13px;line-height:1.6">${p.medications}</div></div>` : ''}
+    ${p.notes ? `<div class="form-group"><label>Notes</label><div style="background:var(--cream);padding:12px;border-radius:8px;font-size:13px">${p.notes}</div></div>` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+      <div style="background:var(--green-pale);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--green)">${reminders.length}</div>
+        <div style="font-size:12px;color:var(--gray)">Reminders Set</div>
+      </div>
+      <div style="background:#EDE9FE;border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#5B21B6">${followups.length}</div>
+        <div style="font-size:12px;color:var(--gray)">Follow-Ups Sent</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:var(--gray)">Added: ${new Date(p.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}</div>
+  `;
+  currentViewingPatientId = id;
+  openModal('viewPatientModal');
+}
+
+function deletePatient(id) {
+  if (!confirm('Delete this patient? This cannot be undone.')) return;
+  db.patients = db.patients.filter(p => p.id !== id);
+  db.reminders = db.reminders.filter(r => r.patientId !== id);
+  db.followups = db.followups.filter(f => f.patientId !== id);
+  save();
+  populatePatientSelects();
+  renderDashboard();
+  renderPatients();
+  renderReminders();
+  renderFollowupHistory();
+  toast('Patient deleted');
+}
+
+function populatePatientSelects() {
+  const opts = `<option value="">Select patient...</option>` +
+    myPatients().map(p => `<option value="${p.id}">${p.name} — ${p.phone}</option>`).join('');
+  ['rPatient','followupPatient','apptPatient'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+// ── REMINDERS ──
+function addReminder() {
+  const patientId = document.getElementById('rPatient').value;
+  const drug = document.getElementById('rDrug').value.trim();
+  const date = document.getElementById('rDate').value;
+  const duration = parseInt(document.getElementById('rDuration').value);
+  const channel = document.getElementById('rChannel').value;
+  if (!patientId || !drug || !date) { toast('Please fill in all required fields', 'error'); return; }
+  const dispensed = new Date(date);
+  const dueDate = new Date(dispensed);
+  dueDate.setDate(dueDate.getDate() + duration - 3); // remind 3 days before
+  const reminder = { id: uid(), userId: currentUser.id, patientId, drug, dispensedDate: date, duration, dueDate: dueDate.toISOString().split('T')[0], channel, status: 'active', createdAt: new Date().toISOString() };
+  db.reminders.push(reminder);
+  save();
+  closeModal('addReminderModal');
+  ['rDrug','rDate'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rPatient').value = '';
+  renderReminders();
+  renderDashboard();
+  toast('Reminder set successfully!');
+}
+
+function getReminderStatus(r) {
+  const today = new Date().toISOString().split('T')[0];
+  if (r.dueDate < today) return 'overdue';
+  if (r.dueDate === today) return 'due';
+  return 'upcoming';
+}
+
+function renderReminders() {
+  const filter = document.getElementById('reminderFilter')?.value || 'all';
+  const myReminders = db.reminders.filter(r => r.userId === currentUser.id);
+  const list = filter === 'all' ? myReminders : myReminders.filter(r => getReminderStatus(r) === filter);
+  const el = document.getElementById('reminderList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-title">No reminders</div><div class="empty-text">Set refill reminders to help chronic patients stay on track.</div><button class="btn btn-primary btn-sm" onclick="openModal('addReminderModal')">+ Add Reminder</button></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Medication</th><th>Due Date</th><th>Channel</th><th>Status</th><th>Action</th></tr></thead><tbody>` +
+    list.map(r => {
+      const p = db.patients.find(x => x.id === r.patientId);
+      const status = getReminderStatus(r);
+      const badgeClass = status === 'overdue' ? 'badge-red' : status === 'due' ? 'badge-orange' : 'badge-green';
+      const label = status === 'overdue' ? 'Overdue' : status === 'due' ? 'Due Today' : 'Upcoming';
+      return `<tr>
+        <td><strong>${p ? p.name : 'Unknown'}</strong><br><span style="font-size:11px;color:var(--gray)">${p ? p.phone : ''}</span></td>
+        <td>${r.drug}</td>
+        <td>${new Date(r.dueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+        <td><span class="badge badge-blue">${r.channel}</span></td>
+        <td><span class="badge ${badgeClass}">${label}</span></td>
+        <td>
+          ${p ? `<button class="btn btn-outline btn-sm" onclick="sendReminderMsg('${r.id}')">📱 Send</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="deleteReminder('${r.id}')">Delete</button>
+        </td>
+      </tr>`;
+    }).join('') + '</tbody></table></div>';
+}
+
+function sendReminderMsg(id) {
+  const r = db.reminders.find(x => x.id === id);
+  const p = db.patients.find(x => x.id === r.patientId);
+  if (!p) return;
+  const msg = `Hello ${p.name.split(' ')[0]},\n\nThis is a reminder from ${currentUser.facility}.\n\nYour medication *${r.drug}* may be due for refill this week.\n\nPlease visit us or call to arrange your refill so you do not run out.\n\nThank you for trusting us with your health. 🙏`;
+  navigator.clipboard.writeText(msg).then(() => toast('Message copied! Paste into WhatsApp or SMS'));
+}
+
+function deleteReminder(id) {
+  if (!confirm('Delete this reminder?')) return;
+  db.reminders = db.reminders.filter(r => r.id !== id);
+  save();
+  renderReminders();
+  renderDashboard();
+  toast('Reminder deleted');
+}
+
+// ── FOLLOW UP ──
+function updateFollowupMessage() {
+  const patientId = document.getElementById('followupPatient').value;
+  const drug = document.getElementById('followupDrug').value.trim();
+  const instruction = document.getElementById('followupInstruction').value.trim();
+  const sideEffects = document.getElementById('followupSideEffects').value.trim();
+  const avoid = document.getElementById('followupAvoid').value.trim();
+  const followDate = document.getElementById('followupDate').value;
+  const preview = document.getElementById('msgPreview');
+  const actions = document.getElementById('msgActions');
+
+  if (!patientId || !drug) {
+    preview.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-title">Fill in the form</div><div class="empty-text">Your follow-up message will appear here.</div></div>`;
+    actions.style.display = 'none';
+    return;
+  }
+
+  const p = db.patients.find(x => x.id === patientId);
+  if (!p) return;
+
+  let msg = `Hello ${p.name},\n\nThank you for visiting ${currentUser.facility} today. 🙏\n\nHere is a quick summary of your medication:\n\n`;
+  // Format drugs — if multiple lines or commas, list them nicely
+  const drugList = drug.split(/[,\n]/).map(d => d.trim()).filter(d => d);
+  if (drugList.length > 1) {
+    msg += `💊 *Medications:*\n`;
+    drugList.forEach(d => { msg += `   • ${d}\n`; });
+  } else {
+    msg += `💊 *Medication:* ${drug}\n`;
+  }
+  if (instruction) msg += `📌 *How to take it:* ${instruction}\n`;
+  if (sideEffects) msg += `⚠️ *Watch out for:* ${sideEffects}\n`;
+  if (avoid) msg += `🚫 *Avoid:* ${avoid}\n`;
+  if (followDate) msg += `📅 *Next visit:* ${new Date(followDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}\n`;
+  msg += `\nPlease do not hesitate to call us if you have any questions or concerns.\n\nStay well! 💚\n— ${currentUser.facility}`;
+
+  preview.innerHTML = `<textarea id="editableMsg" style="width:100%;min-height:280px;border:1.5px solid var(--border);border-radius:10px;padding:14px;font-family:'Epilogue',sans-serif;font-size:13px;line-height:1.8;color:var(--dark);resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border)'">${msg}</textarea>
+<div style="font-size:11px;color:var(--gray);margin-top:4px;">✏️ You can edit this message before sending</div>`;
+  actions.style.display = 'block';
+  actions.dataset.msg = msg;
+  actions.dataset.patientId = patientId;
+  actions.dataset.drug = drug;
+}
+
+function sendFollowup(channel) {
+  const actions = document.getElementById('msgActions');
+  const editableEl = document.getElementById('editableMsg');
+  const msg = editableEl ? editableEl.value : actions.dataset.msg;
+  const patientId = actions.dataset.patientId;
+  const drug = actions.dataset.drug;
+  const p = db.patients.find(x => x.id === patientId);
+  // Save to history
+  const followup = { id: uid(), userId: currentUser.id, patientId, drug, message: msg, sentAt: new Date().toISOString() };
+  db.followups.push(followup);
+  save();
+  renderFollowupHistory();
+  renderDashboard();
+  if (channel === 'whatsapp' && p) {
+    // Clean phone number — remove spaces, dashes, + sign
+    let phone = p.phone.replace(/[^0-9]/g, '');
+    // Convert Nigerian 0xx to 234xx
+    if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+    const encoded = encodeURIComponent(msg);
+    window.open('https://wa.me/' + phone + '?text=' + encoded, '_blank');
+    toast('Opening WhatsApp with message ready to send! 📱');
+  } else {
+    navigator.clipboard.writeText(msg).then(() => {
+      toast('Message copied! Paste into SMS app 📱');
+    });
+  }
+}
+
+function renderFollowupHistory() {
+  const list = db.followups.filter(f => f.userId === currentUser.id).reverse();
+  const el = document.getElementById('followupHistory');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No messages sent yet</div><div class="empty-text">Your sent follow-up messages will appear here.</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Medication</th><th>Sent</th><th>Action</th></tr></thead><tbody>` +
+    list.map(f => {
+      const p = db.patients.find(x => x.id === f.patientId);
+      return `<tr>
+        <td><strong>${p ? p.name : 'Unknown'}</strong></td>
+        <td>${f.drug}</td>
+        <td>${new Date(f.sentAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="recopyMsg('${f.id}')">📋 Copy Again</button></td>
+      </tr>`;
+    }).join('') + '</tbody></table></div>';
+}
+
+function recopyMsg(id) {
+  const f = db.followups.find(x => x.id === id);
+  if (!f) return;
+  navigator.clipboard.writeText(f.message).then(() => toast('Message copied!'));
+}
+
+// ── RECORDS ──
+function renderRecords() {
+  const query = document.getElementById('recordSearch').value.trim().toLowerCase();
+  const el = document.getElementById('recordList');
+  if (!query) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Search for a patient</div><div class="empty-text">Type a name or phone number above.</div></div>`;
+    return;
+  }
+  const results = myPatients().filter(p =>
+    p.name.toLowerCase().includes(query) || p.phone.includes(query)
+  );
+  if (!results.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">No results</div><div class="empty-text">No patient matches "${query}".</div></div>`;
+    return;
+  }
+  el.innerHTML = results.map(p => {
+    const reminders = db.reminders.filter(r => r.patientId === p.id);
+    const followups = db.followups.filter(f => f.patientId === p.id);
+    return `
+    <div style="border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div class="patient-avatar" style="width:48px;height:48px;font-size:18px">${p.name[0].toUpperCase()}</div>
+        <div>
+          <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700">${p.name}</div>
+          <div style="font-size:12px;color:var(--gray)">📞 ${p.phone} ${p.gender ? '· ' + p.gender : ''} ${p.age ? '· Age ' + p.age : ''}</div>
+        </div>
+      </div>
+      ${p.conditions ? `<div class="alert alert-warning" style="margin-bottom:10px">⚕️ ${p.conditions}</div>` : ''}
+      ${p.medications ? `<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Medications</div><div style="font-size:13px;line-height:1.6">${p.medications}</div></div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        <div style="background:var(--green-pale);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--green)">${reminders.length}</div>
+          <div style="font-size:11px;color:var(--gray)">Reminders</div>
+        </div>
+        <div style="background:#EDE9FE;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:#5B21B6">${followups.length}</div>
+          <div style="font-size:11px;color:var(--gray)">Follow-Ups</div>
+        </div>
+      </div>
+      ${p.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--gray);font-style:italic">📝 ${p.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const patients = myPatients();
+  const today = new Date().toISOString().split('T')[0];
+  const myReminders = db.reminders.filter(r => r.userId === currentUser.id);
+  const dueToday = myReminders.filter(r => r.dueDate <= today);
+  const chronic = patients.filter(p => p.conditions);
+  const followups = db.followups.filter(f => f.userId === currentUser.id);
+
+  if (!document.getElementById('statPatients')) return;
+  document.getElementById('statPatients').textContent = patients.length;
+  document.getElementById('statDueToday').textContent = dueToday.length;
+  document.getElementById('statFollowUps').textContent = followups.length;
+  document.getElementById('statChronic').textContent = chronic.length;
+
+  // Due reminders
+  const dashRem = document.getElementById('dashReminders');
+  if (!dueToday.length) {
+    dashRem.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">All clear</div><div class="empty-text">No refills due today.</div></div>`;
+  } else {
+    dashRem.innerHTML = dueToday.slice(0,5).map(r => {
+      const p = db.patients.find(x => x.id === r.patientId);
+      const isOverdue = r.dueDate < today;
+      return `<div class="reminder-item">
+        <div class="reminder-dot" style="background:${isOverdue ? 'var(--red)' : 'var(--orange)'}"></div>
+        <div class="reminder-info">
+          <div class="reminder-name">${p ? p.name : 'Unknown'}</div>
+          <div class="reminder-drug">${r.drug}</div>
+        </div>
+        <div class="reminder-due" style="color:${isOverdue ? 'var(--red)' : 'var(--orange)'}">${isOverdue ? 'Overdue' : 'Due Today'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Recent patients
+  const dashPat = document.getElementById('dashPatients');
+  if (!patients.length) {
+    dashPat.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">No patients yet</div><div class="empty-text">Add your first patient to get started.</div><button class="btn btn-primary btn-sm" onclick="openModal('addPatientModal')">+ Add Patient</button></div>`;
+  } else {
+    dashPat.innerHTML = patients.slice(-5).reverse().map(p => `
+      <div class="reminder-item">
+        <div class="patient-avatar" style="width:36px;height:36px;font-size:13px">${p.name[0].toUpperCase()}</div>
+        <div class="reminder-info">
+          <div class="reminder-name">${p.name}</div>
+          <div class="reminder-drug">${p.phone} ${p.conditions ? '· ' + p.conditions : ''}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="viewPatient('${p.id}')">View</button>
+      </div>
+    `).join('');
+  }
+}
+
+
+
+// Auto-fill patient medications when selected — always updates on patient change
+function onFollowupPatientChange() {
+  const patientId = document.getElementById('followupPatient').value;
+  const drugField = document.getElementById('followupDrug');
+  const sideEffectsField = document.getElementById('followupSideEffects');
+  const avoidField = document.getElementById('followupAvoid');
+
+  // Clear fields first whenever patient changes
+  drugField.value = '';
+  sideEffectsField.value = '';
+  avoidField.value = '';
+
+  if (patientId) {
+    const p = db.patients.find(x => x.id === patientId);
+    if (p && p.medications) {
+      // Auto-fill ALL saved medications
+      drugField.value = p.medications.trim();
+    }
+  }
+  updateFollowupMessage();
+}
+
+// Drug lookup using Claude API with accurate pharmacological knowledge
+async function lookupDrug() {
+  const drug = document.getElementById('followupDrug').value.trim();
+  if (!drug) { toast('Enter a medication name first', 'error'); return; }
+  const statusEl = document.getElementById('drugLookupStatus');
+  statusEl.style.display = 'block';
+  statusEl.textContent = '🔍 Looking up drug information...';
+  statusEl.style.color = 'var(--gray)';
+  try {
+    const { data, error } = await sb.functions.invoke('drug-lookup', { body: { drug } });
+    if (error) throw error;
+    if (!data || !data.content || !data.content[0]) throw new Error('No response');
+    let text = data.content[0].text.trim();
+    text = text.replace(/```json|```/g, '').trim();
+    const info = JSON.parse(text);
+    info.found = info.found !== false && !!(info.sideEffects || info.avoid);
+    if (!info.found) {
+      statusEl.textContent = '⚠️ Drug not recognised. Try the full generic name e.g. "Amlodipine 5mg"';
+      statusEl.style.color = 'var(--orange)';
+      setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
+      return;
+    }
+    if (info.sideEffects) {
+      document.getElementById('followupSideEffects').value = info.sideEffects;
+    }
+    if (info.avoid) {
+      document.getElementById('followupAvoid').value = info.avoid;
+    }
+    statusEl.textContent = '✅ Drug information loaded. Please review it before sending';
+    statusEl.style.color = 'var(--green)';
+    updateFollowupMessage();
+    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+  } catch(e) {
+    console.error(e);
+    statusEl.textContent = '⚠️ Could not load drug info. Please fill manually.';
+    statusEl.style.color = 'var(--orange)';
+    setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
+  }
+}
+
+
+
+
+// ── APPOINTMENTS ──
+function addAppointment() {
+  const patientId = document.getElementById('apptPatient').value;
+  const date = document.getElementById('apptDate').value;
+  const time = document.getElementById('apptTime').value;
+  const reason = document.getElementById('apptReason').value.trim();
+  const notes = document.getElementById('apptNotes').value.trim();
+  if (!patientId || !date || !time) { toast('Please fill in patient, date and time', 'error'); return; }
+  const appt = { id: uid(), userId: currentUser.id, patientId, date, time, reason, notes, status: 'scheduled', createdAt: new Date().toISOString() };
+  if (!db.appointments) db.appointments = [];
+  db.appointments.push(appt);
+  save();
+  closeModal('addAppointmentModal');
+  ['apptDate','apptTime','apptReason','apptNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('apptPatient').value = '';
+  renderAppointments();
+  toast('Appointment booked!');
+}
+
+function renderAppointments() {
+  if (!db.appointments) db.appointments = [];
+  const today = new Date().toISOString().split('T')[0];
+  const filter = document.getElementById('apptFilter')?.value || 'all';
+  const myAppts = db.appointments.filter(a => a.userId === currentUser.id);
+
+  const todayAppts = myAppts.filter(a => a.date === today);
+  const upcomingAppts = myAppts.filter(a => a.date > today).sort((a,b) => a.date.localeCompare(b.date));
+
+  // Today panel
+  const todayEl = document.getElementById('apptToday');
+  if (todayEl) {
+    todayEl.innerHTML = !todayAppts.length
+      ? `<div style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">No appointments today</div>`
+      : todayAppts.map(a => apptCard(a)).join('');
+  }
+
+  // Upcoming panel
+  const upcomingEl = document.getElementById('apptUpcoming');
+  if (upcomingEl) {
+    const next5 = upcomingAppts.slice(0,5);
+    upcomingEl.innerHTML = !next5.length
+      ? `<div style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">No upcoming appointments</div>`
+      : next5.map(a => apptCard(a)).join('');
+  }
+
+  // Main list
+  let filtered = myAppts;
+  if (filter === 'today') filtered = myAppts.filter(a => a.date === today);
+  else if (filter === 'upcoming') filtered = myAppts.filter(a => a.date > today);
+  else if (filter === 'past') filtered = myAppts.filter(a => a.date < today);
+  filtered = filtered.sort((a,b) => a.date.localeCompare(b.date));
+
+  const listEl = document.getElementById('apptList');
+  if (!listEl) return;
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No appointments</div><div class="empty-text">Book your first appointment to get started.</div><button class="btn btn-primary btn-sm" onclick="openModal('addAppointmentModal')">+ Book Appointment</button></div>`;
+    return;
+  }
+  listEl.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Reason</th><th>Action</th></tr></thead><tbody>` +
+    filtered.map(a => {
+      const p = db.patients.find(x => x.id === a.patientId);
+      const isPast = a.date < today;
+      const isToday = a.date === today;
+      return `<tr>
+        <td><strong>${p ? p.name : 'Unknown'}</strong><br><span style="font-size:11px;color:var(--gray)">${p ? p.phone : ''}</span></td>
+        <td>${new Date(a.date + 'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</td>
+        <td>${a.time}</td>
+        <td>${a.reason || 'General visit'}</td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${!isPast ? `<span class="badge ${isToday ? 'badge-orange' : 'badge-green'}">${isToday ? 'Today' : 'Scheduled'}</span>` : `<span class="badge badge-gray">Past</span>`}
+          <button class="btn btn-danger btn-sm" onclick="deleteAppt('${a.id}')">Delete</button>
+        </td>
+      </tr>`;
+    }).join('') + '</tbody></table></div>';
+}
+
+function apptCard(a) {
+  const p = db.patients.find(x => x.id === a.patientId);
+  return `<div class="reminder-item">
+    <div class="patient-avatar" style="width:36px;height:36px;font-size:13px">${p ? p.name[0].toUpperCase() : '?'}</div>
+    <div class="reminder-info">
+      <div class="reminder-name">${p ? p.name : 'Unknown'}</div>
+      <div class="reminder-drug">${a.time} ${a.reason ? '· ' + a.reason : ''}</div>
+    </div>
+  </div>`;
+}
+
+function deleteAppt(id) {
+  if (!confirm('Delete this appointment?')) return;
+  db.appointments = db.appointments.filter(a => a.id !== id);
+  save();
+  renderAppointments();
+  toast('Appointment deleted');
+}
+
+// ── PRINT PATIENT SUMMARY ──
+function printPatient(id) {
+  const p = db.patients.find(x => x.id === id);
+  if (!p) return;
+  const reminders = db.reminders ? db.reminders.filter(r => r.patientId === id) : [];
+  const followups = db.followups ? db.followups.filter(f => f.patientId === id) : [];
+  const appts = db.appointments ? db.appointments.filter(a => a.patientId === id).sort((a,b) => b.date.localeCompare(a.date)) : [];
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Patient Summary — ${p.name}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; color: #111; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 13px; margin-bottom: 24px; }
+    .facility { font-size: 18px; font-weight: 700; color: #0B6E4F; margin-bottom: 4px; }
+    .section { margin-bottom: 20px; }
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #666; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-bottom: 10px; }
+    .row { display: flex; gap: 16px; margin-bottom: 6px; font-size: 14px; }
+    .label { font-weight: 600; min-width: 130px; color: #555; }
+    .allergy-box { background: #FEE2E2; border: 1px solid #FECACA; border-radius: 6px; padding: 10px 14px; font-size: 14px; font-weight: 700; color: #991B1B; margin-bottom: 16px; }
+    .med-box { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 10px 14px; font-size: 14px; white-space: pre-line; }
+    .footer { margin-top: 40px; border-top: 1px solid #eee; padding-top: 12px; font-size: 11px; color: #999; }
+    @media print { body { margin: 20px; } }
+  </style></head><body>
+  <div class="facility">${currentUser.facility}</div>
+  <div class="subtitle">${currentUser.type} · Patient Summary</div>
+  <h1>${p.name}</h1>
+  <div class="subtitle">Generated: ${new Date().toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+  ${p.allergies ? `<div class="allergy-box">🚨 KNOWN ALLERGIES: ${p.allergies}</div>` : ''}
+  <div class="section">
+    <div class="section-title">Patient Details</div>
+    <div class="row"><span class="label">Full Name:</span><span>${p.name}</span></div>
+    <div class="row"><span class="label">Phone:</span><span>${p.phone}</span></div>
+    ${p.age ? `<div class="row"><span class="label">Age:</span><span>${p.age}</span></div>` : ''}
+    ${p.gender ? `<div class="row"><span class="label">Gender:</span><span>${p.gender}</span></div>` : ''}
+    ${p.conditions ? `<div class="row"><span class="label">Conditions:</span><span>${p.conditions}</span></div>` : ''}
+  </div>
+  ${p.medications ? `<div class="section"><div class="section-title">Current Medications</div><div class="med-box">${p.medications}</div></div>` : ''}
+  ${p.notes ? `<div class="section"><div class="section-title">Notes</div><p style="font-size:14px">${p.notes}</p></div>` : ''}
+  ${appts.length ? `<div class="section"><div class="section-title">Appointments (${appts.length})</div>` +
+    appts.slice(0,5).map(a => `<div class="row"><span class="label">${new Date(a.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} ${a.time}</span><span>${a.reason || 'General visit'}</span></div>`).join('') + '</div>' : ''}
+  <div class="section">
+    <div class="section-title">Activity Summary</div>
+    <div class="row"><span class="label">Reminders Set:</span><span>${reminders.length}</span></div>
+    <div class="row"><span class="label">Follow-Ups Sent:</span><span>${followups.length}</span></div>
+    <div class="row"><span class="label">Appointments:</span><span>${appts.length}</span></div>
+    <div class="row"><span class="label">Added:</span><span>${new Date(p.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</span></div>
+  </div>
+  <div class="footer">${currentUser.facility} · Caredesk Patient Summary · Confidential</div>
+  <script>window.onload = function(){ window.print(); }<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// Track current patient being viewed so edit from view modal works
+let currentViewingPatientId = null;
+
+function openEditFromView() {
+  closeModal('viewPatientModal');
+  if (currentViewingPatientId) openEditPatient(currentViewingPatientId);
+}
+
+function openEditPatient(id) {
+  const p = db.patients.find(x => x.id === id);
+  if (!p) return;
+  currentViewingPatientId = id;
+  document.getElementById('editPatientId').value = p.id;
+  document.getElementById('editName').value = p.name || '';
+  document.getElementById('editPhone').value = p.phone || '';
+  document.getElementById('editAge').value = p.age || '';
+  document.getElementById('editGender').value = p.gender || '';
+  document.getElementById('editConditions').value = p.conditions || '';
+  document.getElementById('editAllergies').value = p.allergies || '';
+  document.getElementById('editMeds').value = p.medications || '';
+  document.getElementById('editNotes').value = p.notes || '';
+  openModal('editPatientModal');
+}
+
+function saveEditPatient() {
+  const id = document.getElementById('editPatientId').value;
+  const name = document.getElementById('editName').value.trim();
+  const phone = document.getElementById('editPhone').value.trim();
+  if (!name || !phone) { toast('Name and phone are required', 'error'); return; }
+  const idx = db.patients.findIndex(p => p.id === id);
+  if (idx === -1) { toast('Patient not found', 'error'); return; }
+  db.patients[idx] = {
+    ...db.patients[idx],
+    name,
+    phone,
+    age: document.getElementById('editAge').value,
+    gender: document.getElementById('editGender').value,
+    conditions: document.getElementById('editConditions').value.trim(),
+    allergies: document.getElementById('editAllergies').value.trim(),
+    medications: document.getElementById('editMeds').value.trim(),
+    notes: document.getElementById('editNotes').value.trim(),
+    updatedAt: new Date().toISOString(),
+  };
+  save();
+  closeModal('editPatientModal');
+  populatePatientSelects();
+  renderPatients();
+  renderDashboard();
+  toast('Patient updated successfully!');
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+// Set today's date as default
+const apptDateEl = document.getElementById('apptDate'); if (apptDateEl) apptDateEl.value = new Date().toISOString().split('T')[0];
+// Set today's date as default for reminder
+document.getElementById('rDate').value = new Date().toISOString().split('T')[0];
+
+// Restore an existing server session
+sb.auth.getSession().then(async ({ data }) => {
+  if (data.session) await enterApp(data.session.user);
+});
+</script>
+</body>
+</html>
