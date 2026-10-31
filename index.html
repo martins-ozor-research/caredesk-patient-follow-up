@@ -196,6 +196,56 @@ tr:hover td{background:#FAFAF9;}
   .auth-card{padding:28px 20px;}
   .stats-grid{grid-template-columns:1fr 1fr;}
 }
+
+
+/* MOBILE LAYOUT PATCH — v18 */
+html, body { width:100%; max-width:100%; overflow-x:hidden; }
+body { -webkit-text-size-adjust:100%; }
+.app, .main, .page, .panel, .panel-body, .panel-header { min-width:0; max-width:100%; }
+img, svg, video, canvas { max-width:100%; }
+button, input, select, textarea { max-width:100%; }
+.table-wrap { width:100%; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+@media (max-width:768px) {
+  .main { width:100%; margin:0; padding:74px 14px 28px; overflow-x:hidden; }
+  .mobile-header { position:fixed; width:100%; height:58px; padding:0 14px; }
+  .sidebar { width:min(290px, 86vw); height:100dvh; height:100vh; overflow-y:auto; overscroll-behavior:contain; }
+  .sidebar-nav { min-height:0; }
+  .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .stat-card { min-width:0; padding:15px 12px; }
+  .stat-num { font-size:clamp(23px,7vw,32px); overflow-wrap:anywhere; }
+  .topbar { width:100%; align-items:stretch; gap:10px; }
+  .topbar > *, .topbar-actions { min-width:0; max-width:100%; }
+  .topbar-actions { width:100%; flex-wrap:wrap; }
+  .topbar-actions > * { min-width:0; }
+  .page-title { font-size:23px; overflow-wrap:anywhere; }
+  .panel-header { flex-wrap:wrap; gap:10px; padding:15px; }
+  .panel-body { padding:15px; }
+  .form-grid { grid-template-columns:minmax(0,1fr); }
+  .patient-card { align-items:flex-start; flex-wrap:wrap; gap:10px; }
+  .patient-info { min-width:0; overflow-wrap:anywhere; }
+  .patient-actions { width:100%; }
+  .reminder-item { align-items:flex-start; flex-wrap:wrap; gap:8px 12px; }
+  .reminder-info { min-width:0; flex:1 1 65%; }
+  .reminder-due { white-space:normal; }
+  .modal-overlay { padding:10px; align-items:flex-start; overflow-y:auto; }
+  .modal { width:100%; max-width:100%; max-height:calc(100dvh - 20px); max-height:calc(100vh - 20px); margin:auto 0; overflow-y:auto; }
+  .modal-header, .modal-body, .modal-footer { padding-left:16px; padding-right:16px; }
+  .modal-footer { flex-wrap:wrap; }
+  .modal-footer .btn { flex:1 1 auto; }
+  .toast { left:12px; right:12px; bottom:12px; max-width:none; width:auto; }
+  /* Two-column content blocks were hard-coded inline and need to stack on phones. */
+  .page [style*="grid-template-columns:1fr 1fr"] { grid-template-columns:minmax(0,1fr) !important; }
+  .page [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns:minmax(0,1fr) !important; }
+}
+@media (max-width:380px) {
+  .main { padding-left:11px; padding-right:11px; }
+  .stats-grid { gap:8px; }
+  .stat-card { padding:12px 10px; }
+  .stat-label { font-size:11px; }
+  .auth-card { padding:24px 16px; }
+  .btn { padding:10px 12px; font-size:13px; }
+}
+
 </style>
 </head>
 <body>
@@ -785,9 +835,11 @@ let synced = { patients: new Set(), reminders: new Set(), followups: new Set(), 
 
 async function loadAll() {
   for (const key of TABLE_ORDER) {
-    const { data, error } = await sb.from(key).select('*').order('created_at', { ascending: true });
-    if (error) throw error;
-    db[key] = data.map(TABLES[key].fromRow);
+    // followups uses sent_at; the other tables use created_at.
+    const sortColumn = key === 'followups' ? 'sent_at' : 'created_at';
+    const { data, error } = await sb.from(key).select('*').order(sortColumn, { ascending: true });
+    if (error) throw new Error(`Could not load ${key}: ${error.message}`);
+    db[key] = (data || []).map(TABLES[key].fromRow);
     synced[key] = new Set(db[key].map(x => x.id));
   }
 }
@@ -851,9 +903,13 @@ async function register() {
   if (password.length < 8) { toast('Password must be at least 8 characters', 'error'); return; }
   const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name, facility, type } } });
   if (error) { toast(error.message, 'error'); return; }
-  if (!data.session) { toast('Account created. Check your email to confirm it, then sign in.'); showLogin(); return; }
-  await enterApp(data.user);
-  toast('Account created successfully!');
+  if (!data.session) {
+    toast('Account created, but Supabase did not start a session. Check that Confirm email is OFF, then sign in.', 'error');
+    showLogin();
+    return;
+  }
+  const opened = await enterApp(data.user);
+  if (opened) toast('Account created successfully!');
 }
 
 async function login() {
@@ -875,8 +931,8 @@ async function enterApp(user) {
     startApp();
     return true;
   } catch (e) {
-    console.error(e);
-    toast('Could not load your account data', 'error');
+    console.error('Caredesk account loading failed:', e);
+    toast(e?.message || 'Could not load your account data. Please contact support.', 'error');
     return false;
   }
 }
